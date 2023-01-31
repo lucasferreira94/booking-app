@@ -5,13 +5,18 @@ import (
 	"strings"
 )
 
-func greetUsers(confName string, confTickets int, remaningTickets uint) {
-	fmt.Printf("Welcome to %v booking application\n", confName)
-	fmt.Printf("We have total of %v tickets and %v are still available.\n", confTickets, remaningTickets)
+const conferenceTicket = 50         // Valor constante, que não pode ser alterado
+var confereceName = "Go Conference" // Variável string
+var remaningTickets uint = 50       // Valor uint pois essa variável não poderá conter valor negativo
+var bookings = []string{}
+
+func greetUsers() {
+	fmt.Printf("Welcome to %v booking application\n", confereceName)
+	fmt.Printf("We have total of %v tickets and %v are still available.\n", conferenceTicket, remaningTickets)
 	fmt.Println("Get your tickets here to attend")
 }
 
-func getFirstNames(bookings []string) []string {
+func getFirstNames() []string {
 	firstNames := []string{}
 	for _, booking := range bookings {
 		var names = strings.Fields(booking)
@@ -20,54 +25,59 @@ func getFirstNames(bookings []string) []string {
 	return firstNames
 }
 
-func validateUserInput(firstName, lastName, email string, userTickets, remaningTickets uint) {
+func validateUserInput(firstName string, lastName string, email string, userTickets uint) (bool, bool, bool) {
 	isValidName := len(firstName) >= 2 && len(lastName) >= 2
 	isValidEmail := strings.Contains(email, "@")
 	isValidTicketNumber := userTickets > 0 && userTickets <= remaningTickets
+	return isValidName, isValidEmail, isValidTicketNumber
+}
+
+func getUserInput() (string, string, string, uint) {
+
+	var firstName string
+	var lastName string
+	var email string
+	var userTickets uint
+
+	fmt.Println("Enter your first name: ")
+	fmt.Scan(&firstName)
+
+	fmt.Println("Enter your last name: ")
+	fmt.Scan(&lastName)
+
+	fmt.Println("Enter your email address: ")
+	fmt.Scan(&email)
+
+	fmt.Println("Enter number of tickets")
+	fmt.Scan(&userTickets)
+
+	return firstName, lastName, email, userTickets
+
+}
+
+func bookTicket(userTickets uint, firstName, lastName, email string) {
+	remaningTickets = remaningTickets - userTickets
+	bookings = append(bookings, firstName+" "+lastName)
+
+	fmt.Printf("Thank you %v %v for booking %v tickets. You will receive a confirmation email at %v \n", firstName, lastName, userTickets, email)
+	fmt.Printf("%v tickets remainend for %v\n", remaningTickets, confereceName)
+
 }
 
 func main() {
-	var confereceName = "Go Conference" // Variável string
-	const conferenceTicket = 50         // Valor constante, que não pode ser alterado
-	var remaningTickets uint = 50       // Valor uint pois essa variável não poderá conter valor negativo
-	bookings := []string{}
 
-	greetUsers(confereceName, conferenceTicket, remaningTickets)
+	greetUsers()
 
 	for {
 
-		//userName := ""
-		var firstName string
-		var lastName string
-		var email string
-		var userTickets uint
-
-		// ask user for their name
-		fmt.Println("Enter your first name: ")
-		fmt.Scan(&firstName)
-
-		// ask user for their last name
-		fmt.Println("Enter your last name: ")
-		fmt.Scan(&lastName)
-
-		// ask user for their email
-		fmt.Println("Enter your email address: ")
-		fmt.Scan(&email)
-
-		// ask user for their tickets
-		fmt.Println("Enter number of tickets")
-		fmt.Scan(&userTickets)
-
-		validateUserInput(firstName)
+		firstName, lastName, email, userTickets := getUserInput()
+		isValidName, isValidEmail, isValidTicketNumber := validateUserInput(firstName, lastName, email, userTickets)
 
 		if isValidName && isValidEmail && isValidTicketNumber {
-			remaningTickets = remaningTickets - userTickets
-			bookings = append(bookings, firstName+" "+lastName)
 
-			fmt.Printf("Thank you %v %v for booking %v tickets. You will receive a confirmation email at %v \n", firstName, lastName, userTickets, email)
-			fmt.Printf("%v tickets remainend for %v\n", remaningTickets, confereceName)
+			bookTicket(userTickets, firstName, lastName, email)
 
-			firstNames := getFirstNames(bookings)
+			firstNames := getFirstNames()
 			fmt.Printf("The first names of bookings are: %v\n", firstNames)
 
 			if remaningTickets == 0 {
